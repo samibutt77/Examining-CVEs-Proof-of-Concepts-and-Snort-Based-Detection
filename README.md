@@ -23,117 +23,81 @@ This repository documents hands-on vulnerability analysis and proof-of-concept (
 - Sysinternals DLL loading / DLL hijack (0-day style): Demonstrated DLL injection/hijacking by supplying a malicious DLL alongside Sysinternals tools (e.g., Process Explorer) to achieve DoS or a Meterpreter reverse shell. (Note: zero-day/unassigned in doc.) 
 
 
-- Older TCP/IP DoS CVEs (historical): SYN flooding and TCP/IP stack DoS CVEs used as background for traffic analysis. 
+- Older TCP/IP DoS CVEs (historical): SYN flooding and TCP/IP stack DoS CVEs used as background for traffic analysis.
+
+- Bonus: Syn Flooding DOS POC Converted to Port Scanning. 
+
+
+# Proofs-of-Concept & detection summary
+
+# Environment
+
+- Attacker: Kali Linux (Metasploit, msfvenom, custom scripts)
+
+- Target: Windows VMs (various versions), Docker containers running vulnerable apps
+
+- File hosting: Python http.server for delivering payloads during tests
+
+- Monitoring: Wireshark captures on victim, Snort IDS for signature detection and logging. 
+
+
+# Key PoCs performed (high level)
+
+- BlueKeep: Used Metasploit module to check and exploit legacy Windows RDP; confirmed via RDP traffic in Wireshark and Snort alerts. 
+
+
+- Log4Shell: Deployed a vulnerable Java app in Docker, hosted malicious LDAP/RMI payload, injected ${jndi:ldap://…} in headers to trigger remote code execution (demonstrated by touch /tmp/pwned). Snort captured exploit traffic after rule deployment. 
+
+
+- CVE-2021-41773 (Apache): Ran vulnerable Apache container and issued path traversal requests to read /etc/passwd, validating via packet captures and Snort alerts. 
+
+
+- Sysinternals DLL Hijack: Built malicious DLL (DoS or Meterpreter payload), bundled with Sysinternals binary, served via Python HTTP server; when executed on target, the binary loaded the malicious DLL producing DoS or reverse shell behavior. Detection via Wireshark and process activity logs was shown. 
+
+
+- 7-Zip MotW Bypass (CVE-2025-0411): Created nested 7z archives to strip MotW on extraction, delivered loader.exe; upon extraction, loader executed without MotW warnings leading to reverse shell or DoS. 
+
+
+- OLE Zero-Click (CVE-2025-21298): Crafted malicious RTF, opened/previewed in Word to trigger crash and prove exploitability; also demonstrated potential for Meterpreter reverse shell. 
+
+
+# IDS (Snort) detection
+
+- Custom/standard Snort signatures were deployed to detect: BlueKeep exploit patterns, JNDI/LDAP indicators used by Log4Shell PoCs, directory traversal attempts on Apache, and suspicious downloads/HTTP headers used in PoCs. Snort logged alerts for each exploited case in tests; Wireshark traces corroborated network indicators. 
 
 VA_Assignment01
 
-Proofs-of-Concept & detection summary
-Environment
 
-Attacker: Kali Linux (Metasploit, msfvenom, custom scripts)
+# Detection & mitigation recommendations (summary)
 
-Target: Windows VMs (various versions), Docker containers running vulnerable apps
+# Immediate actions
 
-File hosting: Python http.server for delivering payloads during tests
+- Patch vulnerable software immediately (apply vendor fixes and recommended versions). 
 
-Monitoring: Wireshark captures on victim, Snort IDS for signature detection and logging. 
 
-VulnAss03_Q1
+- Disable or restrict remote services (e.g., RDP), block external access to risky ports. 
 
-Key PoCs performed (high level)
 
-BlueKeep: Used Metasploit module to check and exploit legacy Windows RDP; confirmed via RDP traffic in Wireshark and Snort alerts. 
+# Hardening & policy
 
-VA_Assignment01
+- Enforce application control (AppLocker/WDAC) and DLL signature validation to mitigate DLL hijacking. 
 
-Log4Shell: Deployed a vulnerable Java app in Docker, hosted malicious LDAP/RMI payload, injected ${jndi:ldap://…} in headers to trigger remote code execution (demonstrated by touch /tmp/pwned). Snort captured exploit traffic after rule deployment. 
 
-VA_Assignment01
+- Preserve Mark-of-the-Web behavior and update extraction tools (7-Zip) to fixed versions to prevent MotW bypass exploitation. 
 
-CVE-2021-41773 (Apache): Ran vulnerable Apache container and issued path traversal requests to read /etc/passwd, validating via packet captures and Snort alerts. 
 
-VA_Assignment01
+- Disable insecure Java features (JNDI lookups) or patch Log4j to safe versions; use WAF rules to drop suspicious payloads. 
 
-Sysinternals DLL Hijack: Built malicious DLL (DoS or Meterpreter payload), bundled with Sysinternals binary, served via Python HTTP server; when executed on target, the binary loaded the malicious DLL producing DoS or reverse shell behavior. Detection via Wireshark and process activity logs was shown. 
 
-VulnAss03_Q1
+# Detection
 
-7-Zip MotW Bypass (CVE-2025-0411): Created nested 7z archives to strip MotW on extraction, delivered loader.exe; upon extraction, loader executed without MotW warnings leading to reverse shell or DoS. 
+- Deploy and tune Snort/IDS signatures for observed exploit indicators (JNDI strings, odd LDAP/RMI flows, RDP exploit patterns, unusual file access via HTTP). Use EDR to monitor process creation and DLL loads. 
 
-VulnAss03_Q1
 
-OLE Zero-Click (CVE-2025-21298): Crafted malicious RTF, opened/previewed in Word to trigger crash and prove exploitability; also demonstrated potential for Meterpreter reverse shell. 
+- Monitor for missing MotW flags on extracted files and unusual outbound connections from Office apps (winword.exe) to detect OLE/RCE exploitation. 
 
-VulnAss03_Q1
 
-IDS (Snort) detection
+# Longer term
 
-Custom/standard Snort signatures were deployed to detect: BlueKeep exploit patterns, JNDI/LDAP indicators used by Log4Shell PoCs, directory traversal attempts on Apache, and suspicious downloads/HTTP headers used in PoCs. Snort logged alerts for each exploited case in tests; Wireshark traces corroborated network indicators. 
+- Adopt least privilege, network segmentation, zero trust, and software supply-chain verification for tools used in enterprise (e.g., download Sysinternals from official sources only). 
 
-VA_Assignment01
-
-How to reproduce (safe lab instructions)
-
-WARNING — do NOT run PoCs on production or internet-connected systems. Use isolated lab networks, snapshots, and disposable VMs.
-
-Create isolated virtual network (no internet) and snapshot clean VMs.
-
-Tools required: Kali Linux (Metasploit, msfvenom), Docker, Python (for http.server), Wireshark, Snort, Windows VMs (various versions). 
-
-VulnAss03_Q1
-
-Follow these safe steps per PoC (examples, high level):
-
-Deploy vulnerable container (e.g., Log4Shell vulnerable app) and attacker infrastructure (LDAP/RMI payload host).
-
-Run attacker exploit from Kali and monitor target with Wireshark and Snort.
-
-Restore VM snapshot after each test.
-
-Always document and timestamp captures and Snort alerts for analysis.
-
-(For exact commands and the test artifacts used in the assignments, see the assignment documents in this repo.) 
-
-VA_Assignment01
-
-Detection & mitigation recommendations (summary)
-
-Immediate actions
-
-Patch vulnerable software immediately (apply vendor fixes and recommended versions). 
-
-VA_Assignment01
-
-Disable or restrict remote services (e.g., RDP), block external access to risky ports. 
-
-VA_Assignment01
-
-Hardening & policy
-
-Enforce application control (AppLocker/WDAC) and DLL signature validation to mitigate DLL hijacking. 
-
-VulnAss03_Q1
-
-Preserve Mark-of-the-Web behavior and update extraction tools (7-Zip) to fixed versions to prevent MotW bypass exploitation. 
-
-VulnAss03_Q1
-
-Disable insecure Java features (JNDI lookups) or patch Log4j to safe versions; use WAF rules to drop suspicious payloads. 
-
-VA_Assignment01
-
-Detection
-
-Deploy and tune Snort/IDS signatures for observed exploit indicators (JNDI strings, odd LDAP/RMI flows, RDP exploit patterns, unusual file access via HTTP). Use EDR to monitor process creation and DLL loads. 
-
-VA_Assignment01
-
-Monitor for missing MotW flags on extracted files and unusual outbound connections from Office apps (winword.exe) to detect OLE/RCE exploitation. 
-
-VulnAss03_Q1
-
-Longer term
-
-Adopt least privilege, network segmentation, zero trust, and software supply-chain verification for tools used in enterprise (e.g., download Sysinternals from official sources only). 
-
-VulnAss03_Q1
