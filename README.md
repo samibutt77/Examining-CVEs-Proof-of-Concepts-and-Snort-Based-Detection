@@ -1,5 +1,5 @@
 # CVE Analysis & Detection — PoCs, Snort Detection, and Mitigations
-# Project overview
+# Overview
 
 This repository documents hands-on vulnerability analysis and proof-of-concept (PoC) exploitation carried out in a controlled lab. It includes PoCs for multiple high-impact CVEs, packet captures (Wireshark), IDS detection using Snort, and recommended mitigation strategies. All activities were performed in isolated VMs (attacker/target) and are intended for defensive research, learning, and testing only. 
 
@@ -64,8 +64,6 @@ This repository documents hands-on vulnerability analysis and proof-of-concept (
 # IDS (Snort) detection
 
 - Custom/standard Snort signatures were deployed to detect: BlueKeep exploit patterns, JNDI/LDAP indicators used by Log4Shell PoCs, directory traversal attempts on Apache, and suspicious downloads/HTTP headers used in PoCs. Snort logged alerts for each exploited case in tests; Wireshark traces corroborated network indicators. 
-
-VA_Assignment01
 
 
 # Detection & mitigation recommendations (summary)
