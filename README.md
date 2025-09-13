@@ -3,37 +3,27 @@
 
 This repository documents hands-on vulnerability analysis and proof-of-concept (PoC) exploitation carried out in a controlled lab. It includes PoCs for multiple high-impact CVEs, packet captures (Wireshark), IDS detection using Snort, and recommended mitigation strategies. All activities were performed in isolated VMs (attacker/target) and are intended for defensive research, learning, and testing only. 
 
-VA_Assignment01
+# CVE list (covered in this work)
 
-VulnAss03_Q1
+- BlueKeep — CVE-2019-0708: RDP RCE (wormable) affecting older Windows versions; exploited via Metasploit in lab. 
 
-CVE list (covered in this work)
 
-BlueKeep — CVE-2019-0708: RDP RCE (wormable) affecting older Windows versions; exploited via Metasploit in lab. 
+- Log4Shell — CVE-2021-44228: Log4j JNDI lookup RCE — demonstrated with vulnerable Docker app and LDAP/RMI exploit chain.
+  
 
-VA_Assignment01
+- Apache Path Traversal / RCE — CVE-2021-41773: Path normalization issue in Apache 2.4.49 leading to file disclosure and possible RCE when CGI enabled.
+  
 
-Log4Shell — CVE-2021-44228: Log4j JNDI lookup RCE — demonstrated with vulnerable Docker app and LDAP/RMI exploit chain. 
+- 7-Zip MotW Bypass — CVE-2025-0411: Mark-of-the-Web flag bypass in 7-Zip (pre-24.09) causing extracted files to lose MotW protection; used to deploy payloads silently.
+  
 
-VA_Assignment01
+- Windows OLE Zero-Click — CVE-2025-21298: Use-after-free in OLE parsing allowing zero-click RCE via malicious RTF.
+  
 
-Apache Path Traversal / RCE — CVE-2021-41773: Path normalization issue in Apache 2.4.49 leading to file disclosure and possible RCE when CGI enabled. 
+- Sysinternals DLL loading / DLL hijack (0-day style): Demonstrated DLL injection/hijacking by supplying a malicious DLL alongside Sysinternals tools (e.g., Process Explorer) to achieve DoS or a Meterpreter reverse shell. (Note: zero-day/unassigned in doc.) 
 
-VA_Assignment01
 
-7-Zip MotW Bypass — CVE-2025-0411: Mark-of-the-Web flag bypass in 7-Zip (pre-24.09) causing extracted files to lose MotW protection; used to deploy payloads silently. 
-
-VulnAss03_Q1
-
-Windows OLE Zero-Click — CVE-2025-21298: Use-after-free in OLE parsing allowing zero-click RCE via malicious RTF. 
-
-VulnAss03_Q1
-
-Sysinternals DLL loading / DLL hijack (0-day style): Demonstrated DLL injection/hijacking by supplying a malicious DLL alongside Sysinternals tools (e.g., Process Explorer) to achieve DoS or a Meterpreter reverse shell. (Note: zero-day/unassigned in doc.) 
-
-VulnAss03_Q1
-
-Older TCP/IP DoS CVEs (historical): SYN flooding and TCP/IP stack DoS CVEs used as background for traffic analysis. 
+- Older TCP/IP DoS CVEs (historical): SYN flooding and TCP/IP stack DoS CVEs used as background for traffic analysis. 
 
 VA_Assignment01
 
